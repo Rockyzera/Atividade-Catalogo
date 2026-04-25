@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Produto</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+    <div class="container">
+        <span class="navbar-brand mb-0 h1">📦 Catálogo Dashboard</span>
+
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/produtos">Produtos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/categorias">Categorias</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link text-info fw-bold" href="/cadastro">+ Criar Usuário</a>
+                </li>
+            </ul>
+
+            <div class="d-flex align-items-center">
+                <span class="text-light me-3 small">
+                    Logado como: <strong sec:authentication="name"></strong>
+                </span>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Sair</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+<div class="container">
+    <div class="card shadow mx-auto" style="max-width: 500px;">
+        <div class="card-header bg-white">
+            <h2 class="mb-0">Novo Produto</h2>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/produtos/salvar}" th:object="${produto}" method="post">
+
+                <div class="mb-3">
+                    <label class="form-label">Nome do Produto</label>
+                    <input type="text" th:field="*{nome}" class="form-control"
+                           th:classappend="${#fields.hasErrors('nome')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Valor</label>
+                    <input type="text" th:field="*{valor}" class="form-control"
+                           th:classappend="${#fields.hasErrors('valor')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('valor')}" th:errors="*{valor}"></div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="categoria" class="form-label">Categoria</label>
+                    <select id="categoria" th:field="*{categoria.id}" class="form-select"
+                            th:classappend="${#fields.hasErrors('categoria')} ? 'is-invalid'" required>
+                        <option value="" disabled selected>Selecione uma categoria...</option>
+                        <option th:each="cat : ${categorias}"
+                                th:value="${cat.id}"
+                                th:text="${cat.nome}">
+                        </option>
+                    </select>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('categoria')}" th:errors="*{categoria}"></div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success">Salvar Produto</button>
+                    <a th:href="@{/produtos}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
