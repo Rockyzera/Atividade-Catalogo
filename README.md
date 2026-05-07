@@ -46,3 +46,4 @@ spring.jpa.hibernate.ddl-auto=update
 # Exibe os comandos SQL no console para debug
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
+"# Projeto_Academico_JumpNet" 
