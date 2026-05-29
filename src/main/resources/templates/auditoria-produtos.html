@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Auditoria de Produtos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+    <div class="container">
+        <span class="navbar-brand mb-0 h1">Catalogo Fatec</span>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/produtos">Produtos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/categorias">Categorias</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link active text-warning fw-bold" href="/produtos/auditoria">📋 Auditoria</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link text-info fw-bold" href="/cadastro">+ Criar Usuário</a>
+                </li>
+            </ul>
+            <div class="d-flex align-items-center">
+                <span class="text-light me-3 small">
+                    Logado como: <strong sec:authentication="name"></strong>
+                </span>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Sair</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>📋 Painel de Auditoria</h2>
+            <p class="text-muted mb-0">Produtos ordenados pela modificação mais recente. Estoque baixo destacado em vermelho.</p>
+        </div>
+        <a href="/produtos" class="btn btn-outline-secondary">← Voltar para Produtos</a>
+    </div>
+
+    <!-- Legenda de estoque baixo -->
+    <div class="alert alert-warning d-flex align-items-center gap-2 mb-3">
+        <span>⚠️</span>
+        <span>Produtos com <strong>estoque baixo (quantidade &lt; 5)</strong> estão destacados em vermelho.</span>
+    </div>
+
+    <table class="table table-hover shadow-sm bg-white">
+        <thead class="table-dark">
+        <tr>
+            <th>Nome</th>
+            <th>Categoria</th>
+            <th>Valor</th>
+            <th>Quantidade</th>
+            <th>Última Modificação</th>
+            <th>Data de Cadastro</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${produtos.empty}">
+            <td colspan="6" class="text-center text-muted py-4">Nenhum produto cadastrado.</td>
+        </tr>
+
+        <!-- PONTO 2: Linha inteira fica com fundo vermelho claro quando estoque < 5 -->
+        <tr th:each="p : ${produtos}"
+            th:classappend="${p.quantidade != null and p.quantidade < 5} ? 'table-danger' : ''">
+            <td class="fw-bold align-middle" th:text="${p.nome}"></td>
+            <td class="align-middle" th:text="${p.categoria != null ? p.categoria.nome : '-'}"></td>
+            <td class="align-middle" th:text="${'R$ ' + p.valor}"></td>
+            <td class="align-middle fw-bold">
+                <!-- Badge de estoque baixo -->
+                <span th:if="${p.quantidade != null and p.quantidade < 5}"
+                      class="badge bg-danger me-1">⚠ Baixo</span>
+                <span th:text="${p.quantidade}"></span>
+            </td>
+            <td class="align-middle"
+                th:text="${p.dataAtualizacao != null ? #temporals.format(p.dataAtualizacao, 'dd/MM/yyyy HH:mm:ss') : '-'}">
+            </td>
+            <td class="align-middle text-muted"
+                th:text="${p.dataCadastro != null ? #temporals.format(p.dataCadastro, 'dd/MM/yyyy HH:mm') : '-'}">
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!--
+  FRAGMENTO THYMELEAF — adicione dentro do <form> de cadastro-produto.html e editar-produto.html
+  O campo 'categoria' usa th:field para que o Spring saiba qual CategoriaModel foi selecionada.
+-->
+
+<!-- Campo: Categoria (obrigatório) -->
+<div class="mb-3">
+    <label for="categoria" class="form-label">Categoria</label>
+    <select id="categoria" th:field="*{categoria.id}" class="form-select" required>
+        <option value="" disabled selected>Selecione uma categoria...</option>
+        <!-- 'categorias' é a lista injetada pelo controller via model.addAttribute -->
+        <option th:each="cat : ${categorias}"
+                th:value="${cat.id}"
+                th:text="${cat.nome}"
+                th:selected="${produto.categoria != null and produto.categoria.id == cat.id}">
+        </option>
+    </select>
+    <!-- Exibe mensagem de erro de validação do @NotNull -->
+    <div class="text-danger" th:if="${#fields.hasErrors('categoria')}"
+         th:errors="*{categoria}">
+    </div>
+</div>

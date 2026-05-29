@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Salvar Categoria</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="card shadow mx-auto" style="max-width: 400px;">
+        <div class="card-header bg-dark text-white text-center">
+            <h4 class="mb-0">Dados da Categoria</h4>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/categorias/salvar}" th:object="${categoria}" method="post">
+
+                <input type="hidden" th:field="*{id}">
+
+                <div class="mb-4">
+                    <label class="form-label">Nome da Categoria</label>
+                    <input type="text" th:field="*{nome}" class="form-control"
+                           th:classappend="${#fields.hasErrors('nome')} ? 'is-invalid'" autofocus>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success">Salvar</button>
+                    <a href="/categorias" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
