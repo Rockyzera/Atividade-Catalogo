@@ -5,6 +5,7 @@ import br.com.fatec.catalogo.repositories.CategoriaRepository;
 import br.com.fatec.catalogo.services.ProdutoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -37,7 +38,6 @@ public class ProdutoController {
         return "lista-produtos";
     }
 
-    // PONTO 2: Painel de auditoria — exclusivo para ADMIN (protegido também no SecurityConfig)
     @GetMapping("/auditoria")
     public String painelAuditoria(Model model) {
         model.addAttribute("produtos", service.listarParaAuditoria());
@@ -55,11 +55,15 @@ public class ProdutoController {
     public String salvarProduto(@Valid @ModelAttribute("produto") ProdutoModel produto,
                                 BindingResult result,
                                 Model model,
+                                Authentication authentication,
                                 RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             model.addAttribute("categorias", categoriaRepository.findAll());
             return "cadastro-produto";
         }
+
+        produto.setCriadoPor(authentication.getName());
+        produto.setAtualizadoPor(authentication.getName());
 
         try {
             service.salvar(produto);
@@ -70,7 +74,6 @@ public class ProdutoController {
             return "cadastro-produto";
         }
 
-        // PONTO 3: Mensagem de sucesso com horário
         String horario = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
         redirectAttributes.addFlashAttribute("mensagemSucesso",
                 "Produto salvo com sucesso! Horário da operação: " + horario);
@@ -90,12 +93,18 @@ public class ProdutoController {
                                    @Valid @ModelAttribute("produto") ProdutoModel produto,
                                    BindingResult result,
                                    Model model,
+                                   Authentication authentication,
                                    RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             model.addAttribute("categorias", categoriaRepository.findAll());
             return "editar-produto";
         }
         produto.setIdProduto(id);
+        produto.setAtualizadoPor(authentication.getName());
+
+        // Preserva o criadoPor original
+        ProdutoModel original = service.buscarPorId(id);
+        produto.setCriadoPor(original.getCriadoPor());
 
         try {
             service.salvar(produto);
@@ -105,7 +114,6 @@ public class ProdutoController {
             return "editar-produto";
         }
 
-        // PONTO 3: Mensagem de confirmação de edição com horário
         String horario = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
         redirectAttributes.addFlashAttribute("mensagemSucesso",
                 "Produto atualizado com sucesso! Horário da modificação: " + horario);

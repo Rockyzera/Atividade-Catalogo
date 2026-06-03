@@ -21,7 +21,7 @@
                 </li>
                 <!-- PONTO 2: Link para auditoria visível apenas para ADMIN -->
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                    <a class="nav-link text-warning fw-bold" href="/produtos/auditoria">📋 Auditoria</a>
+                    <a class="nav-link text-warning fw-bold" href="/produtos/auditoria"> Auditoria</a>
                 </li>
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link text-info fw-bold" href="/cadastro">+ Criar Usuário</a>
@@ -96,16 +96,17 @@
             <td colspan="6" class="text-center text-muted py-4">Nenhum produto encontrado.</td>
         </tr>
 
-        <tr th:each="p : ${produtos}">
+        <tr th:each="p : ${produtos}"
+            th:classappend="${p.quantidade != null and p.quantidade < 5} ? 'table-danger' : ''">
             <td th:text="${p.nome}" class="fw-bold align-middle"></td>
             <td th:text="${p.categoria != null ? p.categoria.nome : '-'}" class="align-middle"></td>
             <td th:text="${'R$ ' + p.valor}" class="align-middle"
                 th:classappend="${p.valor > 500} ? 'text-danger fw-bold' : ''">
             </td>
-            <!-- PONTO 2: Destaque visual para estoque baixo (< 5) -->
-            <td class="align-middle fw-bold"
-                th:text="${p.quantidade}"
-                th:classappend="${p.quantidade != null and p.quantidade < 5} ? 'text-danger' : 'text-success'">
+            <td class="align-middle fw-bold">
+                <span th:if="${p.quantidade != null and p.quantidade < 5}"
+                      class="badge bg-danger me-1">Baixo</span>
+                <span th:text="${p.quantidade}"></span>
             </td>
             <td th:text="${p.dataCadastro != null ? #temporals.format(p.dataCadastro, 'dd/MM/yyyy HH:mm') : '-'}" class="align-middle text-muted"></td>
 

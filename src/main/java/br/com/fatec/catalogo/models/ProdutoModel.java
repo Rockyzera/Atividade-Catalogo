@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -27,7 +28,6 @@ public class ProdutoModel implements Serializable {
     @Positive(message = "O valor deve ser numero positivo.")
     private BigDecimal valor;
 
-    // PONTO 1: Novo campo de quantidade com validação de mínimo 0
     @NotNull(message = "A quantidade é obrigatória.")
     @Min(value = 0, message = "A quantidade não pode ser negativa.")
     @Column(nullable = false, columnDefinition = "integer default 0")
@@ -36,8 +36,12 @@ public class ProdutoModel implements Serializable {
     @Column(updatable = false)
     private LocalDateTime dataCadastro;
 
-    // PONTO 2: Campo para auditoria — registra a última modificação
     private LocalDateTime dataAtualizacao;
+
+    @Column(updatable = false)
+    private String criadoPor;
+
+    private String atualizadoPor;
 
     @ManyToOne
     @JoinColumn(name = "categoria_id", nullable = false)
@@ -74,6 +78,12 @@ public class ProdutoModel implements Serializable {
 
     public LocalDateTime getDataAtualizacao() { return dataAtualizacao; }
     public void setDataAtualizacao(LocalDateTime dataAtualizacao) { this.dataAtualizacao = dataAtualizacao; }
+
+    public String getCriadoPor() { return criadoPor; }
+    public void setCriadoPor(String criadoPor) { this.criadoPor = criadoPor; }
+
+    public String getAtualizadoPor() { return atualizadoPor; }
+    public void setAtualizadoPor(String atualizadoPor) { this.atualizadoPor = atualizadoPor; }
 
     public CategoriaModel getCategoria() { return categoria; }
     public void setCategoria(CategoriaModel categoria) { this.categoria = categoria; }

@@ -1,37 +1,130 @@
 <!DOCTYPE html>
-<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
-    <title>Salvar Categoria</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Produto</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-
-<div class="container mt-5">
-    <div class="card shadow mx-auto" style="max-width: 400px;">
-        <div class="card-header bg-dark text-white text-center">
-            <h4 class="mb-0">Dados da Categoria</h4>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+    <div class="container">
+        <span class="navbar-brand mb-0 h1">Catalogo Fatec</span>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/produtos">Produtos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/categorias">Categorias</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link text-warning fw-bold" href="/produtos/auditoria">Auditoria</a>
+                </li>
+            </ul>
+            <div class="d-flex align-items-center">
+                <span class="text-light me-3 small">
+                    Logado como: <strong sec:authentication="name"></strong>
+                </span>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Sair</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+<div class="container">
+    <div class="card shadow mx-auto" style="max-width: 500px;">
+        <div class="card-header bg-white">
+            <h2 class="mb-0">Novo Produto</h2>
         </div>
         <div class="card-body">
-            <form th:action="@{/categorias/salvar}" th:object="${categoria}" method="post">
+            <form id="formProduto" th:action="@{/produtos/salvar}" th:object="${produto}" method="post">
 
-                <input type="hidden" th:field="*{id}">
-
-                <div class="mb-4">
-                    <label class="form-label">Nome da Categoria</label>
+                <div class="mb-3">
+                    <label class="form-label">Nome do Produto</label>
                     <input type="text" th:field="*{nome}" class="form-control"
-                           th:classappend="${#fields.hasErrors('nome')} ? 'is-invalid'" autofocus>
+                           th:classappend="${#fields.hasErrors('nome')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></div>
                 </div>
 
+                <div class="mb-3">
+                    <label class="form-label">Valor</label>
+                    <input type="text" id="valorInput" th:field="*{valor}" class="form-control"
+                           placeholder="R$ 0,00"
+                           th:classappend="${#fields.hasErrors('valor')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('valor')}" th:errors="*{valor}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Quantidade em Estoque</label>
+                    <input type="number" th:field="*{quantidade}" class="form-control" min="0"
+                           th:classappend="${#fields.hasErrors('quantidade')} ? 'is-invalid'"
+                           placeholder="0">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('quantidade')}" th:errors="*{quantidade}"></div>
+                    <div class="form-text text-muted">Valores negativos não são permitidos.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="categoria" class="form-label">Categoria</label>
+                    <select id="categoria" th:field="*{categoria.idCategoria}" class="form-select"
+                            th:classappend="${#fields.hasErrors('categoria')} ? 'is-invalid'" required>
+                        <option value="" disabled selected>Selecione uma categoria...</option>
+                        <option th:each="cat : ${categorias}"
+                                th:value="${cat.idCategoria}"
+                                th:text="${cat.nome}">
+                        </option>
+                    </select>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('categoria')}" th:errors="*{categoria}"></div>
+                </div>
+
                 <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-success">Salvar</button>
-                    <a href="/categorias" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-success">Salvar Produto</button>
+                    <a th:href="@{/produtos}" class="btn btn-outline-secondary">Cancelar</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    const valorInput = document.getElementById('valorInput');
+    const formProduto = document.getElementById('formProduto');
+
+    // 1. Aplica a máscara dinâmica "R$ X.XXX,XX" enquanto digita
+    valorInput.addEventListener('input', function (e) {
+        let value = e.target.value;
+
+        // Remove tudo o que não for número decimal puro
+        value = value.replace(/\D/g, "");
+
+        if (!value) {
+            e.target.value = '';
+            return;
+        }
+
+        // Formata o inteiro como valor monetário com centavos
+        value = (value / 100).toFixed(2) + '';
+        value = value.replace(".", ",");
+        value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+
+        e.target.value = 'R$ ' + value;
+    });
+
+    // 2. Limpeza absoluta antes de submeter ao controller Spring Boot
+    formProduto.addEventListener('submit', function(e) {
+        let value = valorInput.value;
+
+        if (value) {
+            // Elimina o prefixo literal "R$ " e limpa os pontos de milhar "."
+            // Mantém apenas os algarismos numéricos e a única vírgula decimal (ex: 3450,90)
+            let cleanValue = value.replace('R$ ', '').replace(/\./g, '');
+
+            // Atribui o dado tratado de volta ao input para o Spring capturar com @NumberFormat
+            valorInput.value = cleanValue;
+        }
+    });
+</script>
 
 </body>
 </html>

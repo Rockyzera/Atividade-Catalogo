@@ -49,13 +49,14 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Valor</label>
-                    <input type="text" th:field="*{valor}" class="form-control"
+                    <label class="form-label">Valor (R$)</label>
+                    <input type="text" id="valorFormatado" class="form-control"
+                           placeholder="R$ 0,00"
                            th:classappend="${#fields.hasErrors('valor')} ? 'is-invalid'">
+                    <input type="hidden" th:field="*{valor}" id="valorReal">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('valor')}" th:errors="*{valor}"></div>
                 </div>
 
-                <!-- PONTO 1: Novo campo de quantidade com validação -->
                 <div class="mb-3">
                     <label class="form-label">Quantidade em Estoque</label>
                     <input type="number" th:field="*{quantidade}" class="form-control" min="0"
@@ -79,12 +80,33 @@
                 </div>
 
                 <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-success">Salvar Produto</button>
+                    <button type="submit" class="btn btn-success" onclick="return confirm('Deseja salvar o produto?')">Salvar Produto</button>
                     <a th:href="@{/produtos}" class="btn btn-outline-secondary">Cancelar</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
+<script>
+    const valorFormatado = document.getElementById('valorFormatado');
+    const valorReal = document.getElementById('valorReal');
+
+    valorFormatado.addEventListener('input', function () {
+        let digits = this.value.replace(/\D/g, '');
+        if (!digits) {
+            this.value = '';
+            valorReal.value = '';
+            return;
+        }
+        let number = (parseInt(digits) / 100).toFixed(2);
+        // Formata visualmente: R$ 1.500,90
+        let [intPart, decPart] = number.split('.');
+        intPart = intPart.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+        this.value = 'R$ ' + intPart + ',' + decPart;
+        // Salva valor limpo com ponto para o Spring
+        valorReal.value = number;
+    });
+</script>
+
 </body>
 </html>

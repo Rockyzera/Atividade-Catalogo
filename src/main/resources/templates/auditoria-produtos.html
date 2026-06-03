@@ -19,7 +19,7 @@
                     <a class="nav-link" href="/categorias">Categorias</a>
                 </li>
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                    <a class="nav-link active text-warning fw-bold" href="/produtos/auditoria">📋 Auditoria</a>
+                    <a class="nav-link active text-warning fw-bold" href="/produtos/auditoria">Auditoria</a>
                 </li>
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link text-info fw-bold" href="/cadastro">+ Criar Usuário</a>
@@ -40,15 +40,13 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2>📋 Painel de Auditoria</h2>
+            <h2>Painel de Auditoria</h2>
             <p class="text-muted mb-0">Produtos ordenados pela modificação mais recente. Estoque baixo destacado em vermelho.</p>
         </div>
         <a href="/produtos" class="btn btn-outline-secondary">← Voltar para Produtos</a>
     </div>
 
-    <!-- Legenda de estoque baixo -->
     <div class="alert alert-warning d-flex align-items-center gap-2 mb-3">
-        <span>⚠️</span>
         <span>Produtos com <strong>estoque baixo (quantidade &lt; 5)</strong> estão destacados em vermelho.</span>
     </div>
 
@@ -59,32 +57,34 @@
             <th>Categoria</th>
             <th>Valor</th>
             <th>Quantidade</th>
-            <th>Última Modificação</th>
+            <th>Criado por</th>
             <th>Data de Cadastro</th>
+            <th>Editado por</th>
+            <th>Última Modificação</th>
         </tr>
         </thead>
         <tbody>
         <tr th:if="${produtos.empty}">
-            <td colspan="6" class="text-center text-muted py-4">Nenhum produto cadastrado.</td>
+            <td colspan="8" class="text-center text-muted py-4">Nenhum produto cadastrado.</td>
         </tr>
 
-        <!-- PONTO 2: Linha inteira fica com fundo vermelho claro quando estoque < 5 -->
         <tr th:each="p : ${produtos}"
             th:classappend="${p.quantidade != null and p.quantidade < 5} ? 'table-danger' : ''">
             <td class="fw-bold align-middle" th:text="${p.nome}"></td>
             <td class="align-middle" th:text="${p.categoria != null ? p.categoria.nome : '-'}"></td>
             <td class="align-middle" th:text="${'R$ ' + p.valor}"></td>
             <td class="align-middle fw-bold">
-                <!-- Badge de estoque baixo -->
                 <span th:if="${p.quantidade != null and p.quantidade < 5}"
-                      class="badge bg-danger me-1">⚠ Baixo</span>
+                      class="badge bg-danger me-1">Baixo</span>
                 <span th:text="${p.quantidade}"></span>
             </td>
-            <td class="align-middle"
-                th:text="${p.dataAtualizacao != null ? #temporals.format(p.dataAtualizacao, 'dd/MM/yyyy HH:mm:ss') : '-'}">
-            </td>
+            <td class="align-middle" th:text="${p.criadoPor != null ? p.criadoPor : '-'}"></td>
             <td class="align-middle text-muted"
                 th:text="${p.dataCadastro != null ? #temporals.format(p.dataCadastro, 'dd/MM/yyyy HH:mm') : '-'}">
+            </td>
+            <td class="align-middle" th:text="${p.atualizadoPor != null ? p.atualizadoPor : '-'}"></td>
+            <td class="align-middle"
+                th:text="${p.dataAtualizacao != null ? #temporals.format(p.dataAtualizacao, 'dd/MM/yyyy HH:mm:ss') : '-'}">
             </td>
         </tr>
         </tbody>
